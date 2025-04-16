@@ -1,23 +1,33 @@
 services:
-  # PostgreSQL service
-  postgres:
-    image: postgres:15.3-alpine
-    env_file:
-      - ./.env
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data:rw # Use data/postgres directory as volume
+  db:
+    image: postgres:latest
     ports:
-      - 5432:5432
-
-  # Web app service
-  web_app:
-    build: .
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  postgrest:
+    image: postgrest/postgrest:latest
+    ports:
+      - "3000:3000"
     depends_on:
-      - postgres
-    env_file:
-      - ./.env
+      - db
+    environment:
+      - PGRST_DB_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+      - PGRST_DB_SCHEMA=public
+      - PGRST_DB_ANON_ROLE=anon
+  fastapi:
+    build: .
     ports:
-      - "5000:5000"
+      - "8000:8000"
+    depends_on:
+      - postgrest
+      - db
+    env_file:
+      - .env
     volumes:
-      - ./app:/app/app
-      - ./static:/app/static
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+volumes:
+  pgdata:
