@@ -1,15 +1,32 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
-    name: str
+    name: Optional[str] = None
     email: str
-    profile_pic: str | None
 
 
 class UserCreate(UserBase):
-    id: str
+    password: str  # Plain text password, hashed before storage
+
+
+class UserHashed(UserBase):
+    hashed_password: str
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 
 class UserResponse(UserBase):
     id: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
