@@ -2,17 +2,13 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Optional
 
-from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-load_dotenv()
-
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_DAYS = os.getenv("ACCESS_TOKEN_EXPIRE_DAYS")
+ACCESS_TOKEN_EXPIRE_DAYS: int = os.getenv("ACCESS_TOKEN_EXPIRE_DAYS")  # type: ignore
 
 if SECRET_KEY is None:
     raise Exception("SECRET_KEY not defined in the environment")

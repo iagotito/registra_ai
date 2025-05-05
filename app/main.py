@@ -6,10 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.auth.controller import router as auth_router
-
-# from app.records.controller import router as records_router
+from app.records.controller import router as records_router
 from app.users.controller import router as users_router
-from app.users.schemas import UserResponse
 
 app_dir = os.path.dirname(os.path.abspath(__file__))
 static_folder = os.path.abspath(os.path.join(app_dir, "../static"))
@@ -21,7 +19,7 @@ app.mount("/static", StaticFiles(directory=static_folder), name="static")
 templates = Jinja2Templates(directory=template_folder)
 
 app.include_router(users_router)
-# app.include_router(records_router)
+app.include_router(records_router)
 app.include_router(auth_router)
 
 

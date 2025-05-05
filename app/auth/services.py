@@ -7,7 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.auth.jwt import create_access_token
 from app.database.database import get_database
 from app.users.models import User
-from app.users.repositories import UserRepository
+from app.users.repositories import UsersRepository
 from app.users.schemas import UserCreate, UserHashed, UserLogin, UserResponse
 
 # Configuration
@@ -15,19 +15,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    """Hash a password using bcrypt."""
     return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain password against a hashed password."""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 async def create_user(user: UserCreate) -> UserResponse:
-    """Create a new user using UserRepository."""
     async with get_database() as db:
-        user_repo = UserRepository()
+        user_repo = UsersRepository()
         existing_user = await user_repo.list(
             db=db, filters={"email": user.email.lower()}
         )
@@ -37,7 +34,6 @@ async def create_user(user: UserCreate) -> UserResponse:
                 detail="Email already exists",
             )
 
-        # Create new user
         try:
             new_user = User(
                 name=user.name,
@@ -54,9 +50,8 @@ async def create_user(user: UserCreate) -> UserResponse:
 
 
 async def authenticate_user(user: UserLogin) -> Dict[str, str]:
-    """Authenticate a user using UserRepository and return a JWT."""
     async with get_database() as db:
-        user_repo = UserRepository()
+        user_repo = UsersRepository()
         try:
             users = await user_repo.list(db=db, filters={"email": user.email.lower()})
             if not users:
@@ -76,8 +71,9 @@ async def authenticate_user(user: UserLogin) -> Dict[str, str]:
                     status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive"
                 )
 
-            # Generate JWT
-            access_token = create_access_token(data={"sub": str(db_user.id)})
+            access_token = create_access_token(
+                data={"sub": str(db_user.id), "email": db_user.email}
+            )
             return {"access_token": access_token, "token_type": "bearer"}
 
         except Exception as e:
