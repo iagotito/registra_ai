@@ -1,15 +1,10 @@
-import os
-from typing import Optional
+from fastapi import APIRouter, Depends, status
 
-from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Request
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from app.users.services import get_current_user
 
-from .schemas import UserResponse
-from .services import get_user
+router = APIRouter(prefix="/api/users", tags=["users"])
 
-router = APIRouter(prefix="/users", tags=["users"])
-load_dotenv()
 
-# async def get_current_user(
+@router.get("/me", status_code=status.HTTP_200_OK)
+async def get_current_user_from_token(user_data: dict = Depends(get_current_user)):
+    return user_data

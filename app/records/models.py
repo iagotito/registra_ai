@@ -1,18 +1,16 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String
-from sqlalchemy.sql import func
+from sqlalchemy import Column, ForeignKey, Integer, String
 
-from app.database.models import Base
+from app.database.models import Base, BaseModelMixin
 
 
-class Record(Base):
+class Record(BaseModelMixin, Base):
     __tablename__ = "records"
     id = Column(Integer, primary_key=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    amount = Column(Numeric, nullable=False)
+    amount = Column(Integer, nullable=False)
     description = Column(String, nullable=False)
-    created_at = Column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
-    updated_at = Column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+
+    def __init__(self, user_id: str | None, amount: int, description: str):
+        self.user_id = user_id
+        self.amount = amount
+        self.description = description

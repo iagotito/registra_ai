@@ -17,6 +17,9 @@ class RecordResponse(RecordBase):
     user_id: str
     created_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 class HistoryResponse(BaseModel):
     history: list[RecordResponse]
