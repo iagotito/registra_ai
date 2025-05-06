@@ -3,6 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.auth.jwt import verify_token
 from app.database.database import get_database
+from app.database.exceptions import RecordNotFound
 from app.users.schemas import UserResponse
 
 from .repositories import UsersRepository
@@ -26,5 +27,9 @@ async def get_current_user(
         raise HTTPException(status_code=400, detail="Invalid token payload")
 
     async with get_database() as db:
-        user = await user_repository.get(id=user_id, db=db)
+        try:
+            user = await user_repository.get(id=user_id, db=db)
+        except RecordNotFound as e:
+            raise HTTPException(status_code=400, detail="User not found")
+
         return UserResponse.model_validate(user)

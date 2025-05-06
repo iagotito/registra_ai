@@ -1,4 +1,4 @@
-import { loadHomeView } from "./view.js";
+import { loadHomeView } from "./views/homeView.js";
 
 document.addEventListener("DOMContentLoaded", init);
 
