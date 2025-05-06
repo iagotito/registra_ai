@@ -6,9 +6,7 @@ from app.users.schemas import UserCreate, UserHashed, UserLogin, UserResponse
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-@router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/register", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def register_user(user: UserCreate):
     return await create_user(user)
 

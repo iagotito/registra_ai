@@ -22,7 +22,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def create_user(user: UserCreate) -> UserResponse:
+async def create_user(user: UserCreate) -> dict:
     async with get_database() as db:
         user_repo = UsersRepository()
         existing_user = await user_repo.list(
@@ -41,7 +41,13 @@ async def create_user(user: UserCreate) -> UserResponse:
                 hashed_password=hash_password(user.password),
             )
             created_user = await user_repo.add(new_user, db)
-            return UserResponse.model_validate(created_user)
+            access_token = create_access_token(
+                data={"sub": str(created_user.id), "email": created_user.email}
+            )
+            return {
+                "user_data": UserResponse.model_validate(created_user),
+                "access_token": access_token,
+            }
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
